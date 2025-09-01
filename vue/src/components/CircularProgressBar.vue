@@ -1,18 +1,6 @@
 <template>
   <div class="circular-progress">
     <svg :width="size" :height="size" viewBox="0 0 100 100">
-      <defs>
-        <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stop-color="red" />
-          <stop offset="100%" stop-color="green" />
-        </linearGradient>
-      </defs>
-      <defs>
-        <linearGradient id="circleGradient" x1="0%" y1="100%" x2="0%" y2="0%">
-          <stop offset="48%" stop-color="red" />
-          <stop offset="52%" stop-color="green" />
-        </linearGradient>
-      </defs>
       <circle
         v-if="type === 'circle'"
         class="circle"
@@ -25,7 +13,7 @@
         cx="50"
         cy="50"
         transform="rotate(-90 50 50)"
-        stroke="url(#circleGradient)"
+        :stroke="colorBasedOnProgress(value)"
       />
       <path
         v-else
@@ -36,7 +24,7 @@
         :stroke-width="strokeWidth"
         fill="none"
         d="M18,81.7 A45,45 0 1,1 82,81.7"
-        stroke="url(#progressGradient)"
+        :stroke="colorBasedOnProgress(value)"
       />
 
       <text
@@ -125,19 +113,25 @@ const strokeDashoffset = computed(() => {
   return circumference - (props.value / 100) * circumference;
 });
 
-const radius = 45; // Радиус дуги
+const radius = 45;
 const arcLength = (3 / 2) * Math.PI * radius; // Длина дуги для 270 градусов
 const strokeDasharray1 = arcLength;
 const strokeDashoffset1 = computed(() => {
   return arcLength - (props.value / 100) * arcLength;
 });
 
+const colorBasedOnProgress = (value) => {
+  if (value <= 25) return "red";
+  else if (value > 25 && value <= 50) return "orange";
+  else if (value > 50 && value <= 75) return "blue";
+  else return "green";
+};
+
 watch(
   () => props.value,
   (newValue, oldValue) => {
     if (newValue !== oldValue) {
-      // Анимация изменения значения
-      const animationDuration = 500; // Длительность анимации в миллисекундах
+      const animationDuration = 500;
       const startTime = Date.now();
       const interval = setInterval(() => {
         const elapsedTime = Date.now() - startTime;
@@ -178,5 +172,11 @@ watch(
 .warning-text {
   font-size: 10px; /* Уменьшенный размер */
   fill: white; /* Белый цвет */
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: 0;
+  }
 }
 </style>
